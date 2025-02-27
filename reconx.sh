@@ -5,9 +5,10 @@ INPUT_FILE="${1:-all_domains.txt}"
 MASSCAN_RESULTS="1ip_ports.txt"
 CLEANED_PORTS="ulti.txt"
 NUCLEI_WEB_RESULTS="web_vulnerabilities.txt"
+NUCLEI_DAST_RESULTS="dast_results.txt"
 NUCLEI_INFRA_RESULTS="infra_vulnerabilities.txt"
-TELEGRAM_BOT_TOKEN=""
-TELEGRAM_CHAT_ID=""  # Replace with your actual Telegram Chat ID
+TELEGRAM_BOT_TOKEN="7764159945:AAF8WdCx2bBObO5ASGJd0_zlBBah6IWhu5g"
+TELEGRAM_CHAT_ID="6932389568"  # Replace with your actual Telegram Chat ID
 
 # === 1️⃣ Validate Input File ===
 if [ ! -f "$INPUT_FILE" ]; then
@@ -56,9 +57,17 @@ if [ -s "$MASSCAN_RESULTS" ]; then
 fi
 
 # === 6️⃣ Run Nuclei for Vulnerability Detection ===
-if [ -s all_domains.txt ]; then
+# === 6️⃣ Run Nuclei for Vulnerability Detection ===
+if [ -s alive.txt ]; then
     echo "🚀 Running nuclei on alive URLs (Web CVEs)..."
-    nuclei -l all_domains.txt -t takeovers/ -t cves/ -t exposures/ -t misconfiguration/ -dast  -o "$NUCLEI_WEB_RESULTS" -as &
+
+    # Run DAST-specific scans separately
+    nuclei -l alive.txt -t dast/ -o "$NUCLEI_DAST_RESULTS" -dast
+
+    # Run standard vulnerability scans
+    nuclei -l alive.txt -t takeovers/ -t cves/ -t exposures/ -t misconfiguration/ -o "$NUCLEI_WEB_RESULTS" -as &
+
+&
 fi
 
 if [ -s "$CLEANED_PORTS" ]; then
